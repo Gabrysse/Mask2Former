@@ -8,9 +8,8 @@ import math
 import torch
 from torch import nn
 
-import warnings
-
-warnings.filterwarnings("ignore", category=UserWarning)
+#import warnings
+#warnings.filterwarnings("ignore", category=UserWarning)
 
 
 class PositionEmbeddingSine(nn.Module):
