@@ -142,9 +142,6 @@ class MaskFormer(nn.Module):
             num_points=cfg.MODEL.MASK_FORMER.TRAIN_NUM_POINTS,
             oversample_ratio=cfg.MODEL.MASK_FORMER.OVERSAMPLE_RATIO,
             importance_sample_ratio=cfg.MODEL.MASK_FORMER.IMPORTANCE_SAMPLE_RATIO,
-            use_focal=cfg.MODEL.MASK_FORMER.USE_FOCAL,
-            focal_alpha=cfg.MODEL.MASK_FORMER.FOCAL_ALPHA,
-            focal_gamma=cfg.MODEL.MASK_FORMER.FOCAL_GAMMA,
         )
 
         return {
