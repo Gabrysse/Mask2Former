@@ -7,6 +7,8 @@ def add_maskformer2_config(cfg):
     """
     Add config for MASK_FORMER.
     """
+    cfg.NAME = "exp"
+
     # NOTE: configs from original maskformer
     # data config
     # select the dataset mapper
@@ -58,6 +60,7 @@ def add_maskformer2_config(cfg):
     cfg.MODEL.MASK_FORMER.TEST.OBJECT_MASK_THRESHOLD = 0.0
     cfg.MODEL.MASK_FORMER.TEST.OVERLAP_THRESHOLD = 0.0
     cfg.MODEL.MASK_FORMER.TEST.SEM_SEG_POSTPROCESSING_BEFORE_INFERENCE = False
+    cfg.MODEL.MASK_FORMER.TEST.RETURN_OUTPUTS = False
 
     # Sometimes `backbone.size_divisibility` is set to 0 for some backbone (e.g. ResNet)
     # you can use this config to override
@@ -65,6 +68,7 @@ def add_maskformer2_config(cfg):
 
     # pixel decoder config
     cfg.MODEL.SEM_SEG_HEAD.MASK_DIM = 256
+    cfg.MODEL.SEM_SEG_HEAD.DIM_FEEDFORWARD = 1024
     # adding transformer in pixel decoder
     cfg.MODEL.SEM_SEG_HEAD.TRANSFORMER_ENC_LAYERS = 0
     # pixel decoder
@@ -89,6 +93,55 @@ def add_maskformer2_config(cfg):
     cfg.MODEL.SWIN.OUT_FEATURES = ["res2", "res3", "res4", "res5"]
     cfg.MODEL.SWIN.USE_CHECKPOINT = False
 
+    # segformer transformer backbone
+    cfg.MODEL.SEGFORMER = CN()
+    cfg.MODEL.SEGFORMER.PRETRAIN_IMG_SIZE = 224
+    cfg.MODEL.SEGFORMER.PATCH_SIZE = 16
+    cfg.MODEL.SEGFORMER.NUM_CLASSES = 1000
+    cfg.MODEL.SEGFORMER.EMBED_DIM = [64, 128, 256, 512]
+    cfg.MODEL.SEGFORMER.NUM_HEADS = [1, 2, 4, 8]
+    cfg.MODEL.SEGFORMER.MLP_RATIOS = [4, 4, 4, 4]
+    cfg.MODEL.SEGFORMER.QKV_BIAS = True
+    cfg.MODEL.SEGFORMER.QK_SCALE = None
+    cfg.MODEL.SEGFORMER.DROP_RATE = 0.0
+    cfg.MODEL.SEGFORMER.ATTN_DROP_RATE = 0.0
+    cfg.MODEL.SEGFORMER.DROP_PATH_RATE = 0.0
+    cfg.MODEL.SEGFORMER.DEPTHS = [3, 4, 6, 3]
+    cfg.MODEL.SEGFORMER.SR_RATIOS = [8, 4, 2, 1]
+    cfg.MODEL.SEGFORMER.OUT_FEATURES = ["res2", "res3", "res4", "res5"]
+
+    # convnext backbone
+    cfg.MODEL.CONVNEXT = CN()
+    cfg.MODEL.CONVNEXT.DROP_PATH_RATE = 0.0
+    cfg.MODEL.CONVNEXT.EMBED_DIM = [96, 192, 384, 768]
+    cfg.MODEL.CONVNEXT.DEPTHS = [3, 3, 9, 3]
+    cfg.MODEL.CONVNEXT.LAYER_SCALE_INIT_VALUE = 1e-6
+    cfg.MODEL.CONVNEXT.OUT_INDICES = [0, 1, 2, 3]
+    cfg.MODEL.CONVNEXT.OUT_FEATURES = ["res2", "res3", "res4", "res5"]
+
+    # convnextv2 backbone
+    cfg.MODEL.CONVNEXTV2 = CN()
+    cfg.MODEL.CONVNEXTV2.DROP_PATH_RATE = 0.0
+    cfg.MODEL.CONVNEXTV2.EMBED_DIM = [96, 192, 384, 768]
+    cfg.MODEL.CONVNEXTV2.DEPTHS = [3, 3, 9, 3]
+    cfg.MODEL.CONVNEXTV2.OUT_FEATURES = ["res2", "res3", "res4", "res5"]
+
+    # timm backbone (general setting)
+    cfg.MODEL.TIMMBACKBONE = CN()
+    cfg.MODEL.TIMMBACKBONE.MODEL_NAME = ""
+    cfg.MODEL.TIMMBACKBONE.PRETRAINED = True
+    cfg.MODEL.TIMMBACKBONE.NORM = 'SyncBN'
+    cfg.MODEL.TIMMBACKBONE.OUT_FEATURES = ["res2", "res3", "res4", "res5"]
+
+    # stdc backbone
+    cfg.MODEL.STDC = CN()
+    cfg.MODEL.STDC.LAYERS = [2, 2, 2]
+    cfg.MODEL.STDC.BLOCK_NUM = 4
+    cfg.MODEL.STDC.BLOCK_TIPE = "cat"
+    cfg.MODEL.STDC.USE_CONV_LAST = False
+    cfg.MODEL.STDC.NORM = 'SyncBN'
+    cfg.MODEL.STDC.OUT_FEATURES = ["res2", "res3", "res4", "res5"]
+
     # NOTE: maskformer2 extra configs
     # transformer module
     cfg.MODEL.MASK_FORMER.TRANSFORMER_DECODER_NAME = "MultiScaleMaskedTransformerDecoder"
@@ -109,6 +162,15 @@ def add_maskformer2_config(cfg):
     # Oversampling parameter for PointRend point sampling during training. Parameter `k` in the
     # original paper.
     cfg.MODEL.MASK_FORMER.OVERSAMPLE_RATIO = 3.0
-    # Importance sampling parameter for PointRend point sampling during training. Parametr `beta` in
+    # Importance sampling parameter for PointRend point sampling during training. Parameter `beta` in
     # the original paper.
     cfg.MODEL.MASK_FORMER.IMPORTANCE_SAMPLE_RATIO = 0.75
+    cfg.MODEL.MASK_FORMER.USE_FOCAL = False
+    cfg.MODEL.MASK_FORMER.FOCAL_ALPHA = 10.0
+    cfg.MODEL.MASK_FORMER.FOCAL_GAMMA = 2.0
+
+    # WANDB
+    cfg.WANDB = CN()
+    cfg.WANDB.ENABLED = True
+    cfg.WANDB.PROJECT = "masterThesis"
+    cfg.WANDB.ENTITY = "gabrysse"

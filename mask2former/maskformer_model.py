@@ -43,6 +43,7 @@ class MaskFormer(nn.Module):
         panoptic_on: bool,
         instance_on: bool,
         test_topk_per_image: int,
+        return_outputs: bool,
     ):
         """
         Args:
@@ -67,6 +68,7 @@ class MaskFormer(nn.Module):
             instance_on: bool, whether to output instance segmentation prediction
             panoptic_on: bool, whether to output panoptic segmentation prediction
             test_topk_per_image: int, instance segmentation parameter, keep topk instances per image
+            return_outputs: bool, used to return (or not) the network outputs (useful for visualization)
         """
         super().__init__()
         self.backbone = backbone
@@ -89,9 +91,10 @@ class MaskFormer(nn.Module):
         self.instance_on = instance_on
         self.panoptic_on = panoptic_on
         self.test_topk_per_image = test_topk_per_image
+        self.return_outputs = return_outputs
 
-        if not self.semantic_on:
-            assert self.sem_seg_postprocess_before_inference
+        # if not self.semantic_on:
+        #     assert self.sem_seg_postprocess_before_inference
 
     @classmethod
     def from_config(cls, cfg):
@@ -115,6 +118,10 @@ class MaskFormer(nn.Module):
             num_points=cfg.MODEL.MASK_FORMER.TRAIN_NUM_POINTS,
         )
 
+        # Losses legend
+        #   - loss_ce   : ce classification loss
+        #   - loss_mask : ce mask loss
+        #   - loss_dice : dice mask loss
         weight_dict = {"loss_ce": class_weight, "loss_mask": mask_weight, "loss_dice": dice_weight}
 
         if deep_supervision:
@@ -135,6 +142,9 @@ class MaskFormer(nn.Module):
             num_points=cfg.MODEL.MASK_FORMER.TRAIN_NUM_POINTS,
             oversample_ratio=cfg.MODEL.MASK_FORMER.OVERSAMPLE_RATIO,
             importance_sample_ratio=cfg.MODEL.MASK_FORMER.IMPORTANCE_SAMPLE_RATIO,
+            use_focal=cfg.MODEL.MASK_FORMER.USE_FOCAL,
+            focal_alpha=cfg.MODEL.MASK_FORMER.FOCAL_ALPHA,
+            focal_gamma=cfg.MODEL.MASK_FORMER.FOCAL_GAMMA,
         )
 
         return {
@@ -158,6 +168,7 @@ class MaskFormer(nn.Module):
             "instance_on": cfg.MODEL.MASK_FORMER.TEST.INSTANCE_ON,
             "panoptic_on": cfg.MODEL.MASK_FORMER.TEST.PANOPTIC_ON,
             "test_topk_per_image": cfg.TEST.DETECTIONS_PER_IMAGE,
+            "return_outputs": cfg.MODEL.MASK_FORMER.TEST.RETURN_OUTPUTS
         }
 
     @property
@@ -226,7 +237,7 @@ class MaskFormer(nn.Module):
                 align_corners=False,
             )
 
-            del outputs
+            # del outputs
 
             processed_results = []
             for mask_cls_result, mask_pred_result, input_per_image, image_size in zip(
@@ -259,7 +270,10 @@ class MaskFormer(nn.Module):
                     instance_r = retry_if_cuda_oom(self.instance_inference)(mask_cls_result, mask_pred_result)
                     processed_results[-1]["instances"] = instance_r
 
-            return processed_results
+            if self.return_outputs:
+                return processed_results, outputs
+            else:
+                return processed_results
 
     def prepare_targets(self, targets, images):
         h_pad, w_pad = images.tensor.shape[-2:]
